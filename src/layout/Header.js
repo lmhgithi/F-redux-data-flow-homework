@@ -1,19 +1,35 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { setUser } from '../actions';
 import './Header.scss';
 
 class Header extends Component {
   render() {
+    const { user } = this.props;
     return (
       <header className="header">
         <div className="header-wrapper">
-          <img src="" alt="头像" />
-          <span className="username">用户名</span>
-
-          <a className="sign">Sign out</a>
+          {user && <img src={user.avatar} alt="头像" />}
+          {user && <span className="username">{user.name}</span>}
+          <a className="sign" onClick={user === undefined ? this.props.signIn : this.props.signOut}>
+            {user === undefined ? 'Sign in' : 'Sign out'}
+          </a>
         </div>
       </header>
     );
   }
 }
+const mapStateToProps = ({ user, isLogin }) => ({ user, isLogin });
 
-export default Header;
+const mapDispatchToProps = dispatch => ({
+  signIn() {
+    fetch(`https://my-json-server.typicode.com/kevindongzg/demo/login`, { method: 'GET' })
+      .then(res => res.json())
+      .then(json => dispatch(setUser(json)));
+  },
+  signOut() {
+    dispatch(setUser(undefined));
+  }
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Header);
